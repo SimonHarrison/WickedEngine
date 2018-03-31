@@ -14,6 +14,7 @@ public:
 
 private:
 	window_type window;
+	RECT originalRect;
 
 public:
 	wiWindowRegistration() :window(nullptr) {}
@@ -21,8 +22,14 @@ public:
 	window_type GetRegisteredWindow() {
 		return window;
 	}
+	RECT const& GetOriginalRect() const
+	{
+		return originalRect;
+	}
+
 	void RegisterWindow(window_type wnd) {
 		window = wnd;
+		GetWindowRect(wnd, &originalRect);
 	}
 	bool IsWindowActive() {
 #ifndef WINSTORE_SUPPORT

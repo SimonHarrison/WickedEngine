@@ -190,7 +190,17 @@ XMFLOAT4 wiInputManager::getpointer()
 	POINT p;
 	GetCursorPos(&p);
 	ScreenToClient(wiWindowRegistration::GetInstance()->GetRegisteredWindow(), &p);
-	return XMFLOAT4((float)p.x, (float)p.y, mousewheel_scrolled, 0);
+
+	// at this point p is relative to the current window - now get it relative to the original window
+	// since the GUI elements and model picking is all relative to the original window space
+	// and the window may since have been resized
+	RECT rectNow;
+	GetWindowRect(wiWindowRegistration::GetInstance()->GetRegisteredWindow(), &rectNow);
+	RECT const & origRect = wiWindowRegistration::GetInstance()->GetOriginalRect();
+	float xFactor = (float)(origRect.right - origRect.left) / (float)(rectNow.right - rectNow.left);
+	float yFactor = (float)(origRect.bottom - origRect.top) / (float)(rectNow.bottom - rectNow.top);
+
+	return XMFLOAT4((float)p.x * xFactor, (float)p.y * yFactor, mousewheel_scrolled, 0);
 #else
 	auto& p = Windows::UI::Core::CoreWindow::GetForCurrentThread()->PointerPosition;
 	return XMFLOAT4(p.X, p.Y, mousewheel_scrolled, 0);
